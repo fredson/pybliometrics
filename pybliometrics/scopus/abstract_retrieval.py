@@ -161,8 +161,18 @@ class AbstractRetrieval(Retrieval):
         """
         date = self._confevent.get('confdate', {})
         if len(date) > 0:
-            start = {k: int(v) for k, v in date['startdate'].items()}
-            end = {k: int(v) for k, v in date['enddate'].items()}
+            try:
+                start = {k: int(v) for k, v in date['startdate'].items()}
+            except KeyError:
+                start = {'@day': None,
+                         '@month': None,
+                         '@year': None}
+            try:
+                end = {k: int(v) for k, v in date['enddate'].items()}
+            except KeyError:
+                end = {'@day': None,
+                       '@month': None,
+                       '@year': None}
             return ((start['@year'], start['@month'], start['@day']),
                     (end['@year'], end['@month'], end['@day']))
         else:
