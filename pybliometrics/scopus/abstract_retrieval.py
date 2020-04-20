@@ -161,8 +161,18 @@ class AbstractRetrieval(Retrieval):
         """
         date = self._confevent.get('confdate', {})
         if len(date) > 0:
-            start = {k: int(v) for k, v in date['startdate'].items()}
-            end = {k: int(v) for k, v in date['enddate'].items()}
+            try:
+                start = {k: int(v) for k, v in date['startdate'].items()}
+            except KeyError:
+                start = {'@day': None,
+                         '@month': None,
+                         '@year': None}
+            try:
+                end = {k: int(v) for k, v in date['enddate'].items()}
+            except KeyError:
+                end = {'@day': None,
+                       '@month': None,
+                       '@year': None}
             return ((start['@year'], start['@month'], start['@day']),
                     (end['@year'], end['@month'], end['@day']))
         else:
@@ -183,7 +193,7 @@ class AbstractRetrieval(Retrieval):
         """Sponsor(s) of the conference the document belongs to."""
         path = ['confsponsors', 'confsponsor']
         sponsors = chained_get(self._confevent, path, [])
-        if len(sponsors) == 0:
+        if not sponsors or len(sponsors) == 0:
             return None
         if isinstance(sponsors, list):
             return [s['$'] for s in sponsors]
@@ -200,12 +210,21 @@ class AbstractRetrieval(Retrieval):
         fields = 'given_name initials surname indexed_name role'
         pers = namedtuple('Contributor', fields)
         for item in items:
-            entry = item.get('contributor', {})
-            new = pers(indexed_name=entry.get('ce:indexed-name'),
-                role=entry.get('@role'), surname=entry.get('ce:surname'),
-                given_name=entry.get('ce:given-name'),
-                initials=entry.get('ce:initials'))
-            out.append(new)
+            try:
+                entry = item.get('contributor', {})
+                new = pers(indexed_name=entry.get('ce:indexed-name'),
+                           role=entry.get('@role'), surname=entry.get('ce:surname'),
+                           given_name=entry.get('ce:given-name'),
+                           initials=entry.get('ce:initials'))
+                out.append(new)
+            except AttributeError:
+                for i in entry:
+                    e = i.get('contributor', {})
+                    new = pers(indexed_name=e.get('ce:indexed-name'),
+                               role=e.get('@role'), surname=e.get('ce:surname'),
+                               given_name=e.get('ce:given-name'),
+                               initials=e.get('ce:initials'))
+                    out.append(new)
         return out or None
 
     @property
@@ -290,10 +309,15 @@ class AbstractRetrieval(Retrieval):
         """ISBNs belonging to publicationName as tuple of variying length,
         (e.g. ISBN-10 or ISBN-13)."""
         isbns = listify(chained_get(self._head, ['source', 'isbn'], []))
-        if len(isbns) == 0:
-            return None
-        else:
-            return tuple((i['$'] for i in isbns))
+        try:
+            if len(isbns) == 0:
+                return None
+            elif isinstance(isbns, str):
+                return tuple((isbns,))
+            else:
+                return tuple((i['$'] for i in isbns))
+        except TypeError:
+            return tuple((isbns,))
 
     @property
     def issn(self):
