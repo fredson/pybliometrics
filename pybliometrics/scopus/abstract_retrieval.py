@@ -193,7 +193,7 @@ class AbstractRetrieval(Retrieval):
         """Sponsor(s) of the conference the document belongs to."""
         path = ['confsponsors', 'confsponsor']
         sponsors = chained_get(self._confevent, path, [])
-        if len(sponsors) == 0:
+        if not sponsors or len(sponsors) == 0:
             return None
         if isinstance(sponsors, list):
             return [s['$'] for s in sponsors]
