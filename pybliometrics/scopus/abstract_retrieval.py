@@ -218,12 +218,12 @@ class AbstractRetrieval(Retrieval):
                            initials=entry.get('ce:initials'))
                 out.append(new)
             except AttributeError:
-                for i in item:
-                    entry = i.get('contributor', {})
-                    new = pers(indexed_name=entry.get('ce:indexed-name'),
-                               role=entry.get('@role'), surname=entry.get('ce:surname'),
-                               given_name=entry.get('ce:given-name'),
-                               initials=entry.get('ce:initials'))
+                for i in entry:
+                    e = i.get('contributor', {})
+                    new = pers(indexed_name=e.get('ce:indexed-name'),
+                               role=e.get('@role'), surname=e.get('ce:surname'),
+                               given_name=e.get('ce:given-name'),
+                               initials=e.get('ce:initials'))
                     out.append(new)
         return out or None
 
