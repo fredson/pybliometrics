@@ -309,10 +309,14 @@ class AbstractRetrieval(Retrieval):
         """ISBNs belonging to publicationName as tuple of variying length,
         (e.g. ISBN-10 or ISBN-13)."""
         isbns = listify(chained_get(self._head, ['source', 'isbn'], []))
-        if len(isbns) == 0:
-            return None
-        else:
-            return tuple((i['$'] for i in isbns))
+        try:
+            if len(isbns) == 0:
+                return None
+            else:
+                return tuple((i['$'] for i in isbns))
+        except Exception as E:
+            print([i for i in isbns])
+            return E
 
     @property
     def issn(self):
