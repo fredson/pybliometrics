@@ -316,9 +316,8 @@ class AbstractRetrieval(Retrieval):
                 return tuple((isbns,))
             else:
                 return tuple((i['$'] for i in isbns))
-        except Exception as E:
-            print(E, [i for i in isbns], type([i for i in isbns]))
-            raise
+        except TypeError:
+            return tuple((isbns,))
 
     @property
     def issn(self):
