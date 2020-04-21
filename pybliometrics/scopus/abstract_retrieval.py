@@ -317,7 +317,7 @@ class AbstractRetrieval(Retrieval):
             else:
                 return tuple((i['$'] for i in isbns))
         except Exception as E:
-            print([i for i in isbns])
+            print(E, [i for i in isbns])
             return E
 
     @property
