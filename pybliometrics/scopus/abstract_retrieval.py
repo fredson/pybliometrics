@@ -312,6 +312,8 @@ class AbstractRetrieval(Retrieval):
         try:
             if len(isbns) == 0:
                 return None
+            elif isinstance(isbns, str):
+                return tuple((isbns,))
             else:
                 return tuple((i['$'] for i in isbns))
         except Exception as E:
